@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CurrencyDemo</string>
+    <string name="demo_sort">Sort</string>
+    <string name="demo_load_data">Load Data</string>
+</resources>
