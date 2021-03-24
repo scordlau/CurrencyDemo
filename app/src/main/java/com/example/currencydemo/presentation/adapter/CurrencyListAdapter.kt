@@ -10,6 +10,7 @@ import com.example.core.domain.CurrencyInfo
 import com.example.currencydemo.R
 import com.example.currencydemo.databinding.ItemCurrencyListBinding
 import com.example.currencydemo.presentation.viewmodel.CurrencyListVHViewModel
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -20,7 +21,7 @@ class CurrencyListAdapter(private val data: List<CurrencyInfo>,
                           private val currencyInfoAdapterItemClick: MutableLiveData<CurrencyInfo>
 ) : RecyclerView.Adapter<CurrencyListAdapter.CurrencyListViewHolder>() {
 
-    private val viewModels = data.map { CurrencyListVHViewModel(it) }.toMutableList()
+    private var viewModels = data.map { CurrencyListVHViewModel(it) }.toMutableList()
     var isSortAscending = AtomicBoolean(true)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CurrencyListViewHolder {
@@ -35,7 +36,7 @@ class CurrencyListAdapter(private val data: List<CurrencyInfo>,
         return CurrencyListViewHolder(binding)
     }
 
-    override fun getItemCount(): Int = data.size
+    override fun getItemCount(): Int = viewModels.size
 
     override fun onBindViewHolder(holder: CurrencyListViewHolder, position: Int) {
         holder.bind(viewModels[position])
@@ -43,15 +44,33 @@ class CurrencyListAdapter(private val data: List<CurrencyInfo>,
 
     fun sort() {
         synchronized(this) {
-            when (isSortAscending.getAndSet(!isSortAscending.get())) {
-                true -> viewModels.sortBy { it.data.id }
-                false -> viewModels.sortByDescending { it.data.id }
-            }
-            notifyItemRangeChanged(0, data.size)
+            sortData(isSortAscending.getAndSet(!isSortAscending.get()))
+            notifyItemRangeChanged(0, viewModels.size)
         }
     }
 
-    inner class CurrencyListViewHolder(private val binding: ItemCurrencyListBinding): RecyclerView.ViewHolder(binding.root) {
+    private fun sortData(isSortAsc: Boolean) {
+        when (isSortAsc) {
+            true -> viewModels.sortBy { it.data.id }
+            false -> viewModels.sortByDescending { it.data.id }
+        }
+    }
+
+    fun filter(searchText: String) {
+        val isOriginalDataSet = viewModels.size == data.size
+        if (searchText.isEmpty() && isOriginalDataSet) return
+        val oldSize = itemCount
+        viewModels = filterViewModelPerKeyword(searchText)
+        sortData(isSortAscending.get())
+        notifyItemRangeChanged(0, oldSize)
+    }
+
+    private fun filterViewModelPerKeyword(searchText: String): MutableList<CurrencyListVHViewModel> =
+            data.filter { it.name.toLowerCase(Locale.getDefault()).contains(searchText.toLowerCase(Locale.getDefault())) }
+                    .map { CurrencyListVHViewModel(it) }
+                    .toMutableList()
+
+    inner class CurrencyListViewHolder(private val binding: ItemCurrencyListBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(currencyListVHViewModel: CurrencyListVHViewModel) {
             binding.viewModel = currencyListVHViewModel

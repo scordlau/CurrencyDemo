@@ -1,8 +1,8 @@
 package com.example.currencydemo.presentation
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -15,7 +15,7 @@ import com.example.currencydemo.presentation.viewmodel.DemoActivityViewModel
 
 class DemoActivity : AppCompatActivity(), ICurrencyListParent {
 
-    var fragment: CurrencyListFragment?= null
+    var currencyListFragment: CurrencyListFragment? = null
     lateinit var binding: ActivityDemoBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +34,7 @@ class DemoActivity : AppCompatActivity(), ICurrencyListParent {
 
     private fun initClickListener() {
         binding.btnSortDemo.setOnClickListener {
-            fragment?.sort()
+            currencyListFragment?.sort()
         }
     }
 
@@ -50,7 +50,7 @@ class DemoActivity : AppCompatActivity(), ICurrencyListParent {
     }
 
     private fun createCurrencyListFragment(it: ArrayList<CurrencyInfo>?) {
-        fragment = CurrencyListFragment.newInstance(Bundle().apply {
+        currencyListFragment = CurrencyListFragment.newInstance(Bundle().apply {
             putSerializable(CurrencyListFragment.CURRENCY_DATA, it)
         }).also {
             it.register(this)
